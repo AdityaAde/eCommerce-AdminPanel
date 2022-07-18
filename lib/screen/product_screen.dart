@@ -21,45 +21,46 @@ class ProductScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            SizedBox(
-              height: 100,
-              child: Card(
-                margin: EdgeInsets.zero,
-                color: Colors.black,
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Get.to(() => NewProductScreen());
-                      },
-                      icon: const Icon(
-                        Icons.add_circle,
-                        color: Colors.white,
-                      ),
+            InkWell(
+              child: SizedBox(
+                height: 100,
+                child: Card(
+                  margin: EdgeInsets.zero,
+                  color: Colors.black,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Row(
+                      children: const [
+                        Icon(Icons.add_circle, color: Colors.white),
+                        SizedBox(width: 15),
+                        Text(
+                          'Add a New Product',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                        )
+                      ],
                     ),
-                    const Text(
-                      'Add a New Product',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                    )
-                  ],
+                  ),
                 ),
               ),
+              onTap: () {
+                Get.to(() => NewProductScreen());
+              },
             ),
             Expanded(
-              child: ListView.builder(
+                child: Obx(
+              () => ListView.builder(
                 itemCount: productController.products.length,
                 itemBuilder: (context, index) {
-                  return Obx(
-                    () => SizedBox(
-                        height: 235,
-                        child: ProductCard(
-                          product: productController.products[index],
-                          index: index,
-                        )),
+                  return SizedBox(
+                    height: 235,
+                    child: ProductCard(
+                      product: productController.products[index],
+                      index: index,
+                    ),
                   );
                 },
               ),
-            )
+            ))
           ],
         ),
       ),
@@ -127,6 +128,9 @@ class ProductCard extends StatelessWidget {
                                 onChanged: (value) {
                                   productController.updateProductPrice(index, product, value);
                                 },
+                                onChangeEnd: (value) {
+                                  productController.saveNewProductPrice(product, 'price', value);
+                                },
                               ),
                             ),
                             Text(
@@ -155,6 +159,9 @@ class ProductCard extends StatelessWidget {
                                 inactiveColor: Colors.black12,
                                 onChanged: (value) {
                                   productController.updateProductQuantity(index, product, value.toInt());
+                                },
+                                onChangeEnd: (value) {
+                                  productController.saveNewProductQuantity(product, 'quantity', value.toInt());
                                 },
                               ),
                             ),

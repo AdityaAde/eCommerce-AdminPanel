@@ -1,13 +1,19 @@
 import 'package:backend_getx/controller/product_controller.dart';
+import 'package:backend_getx/models/product_models.dart';
+import 'package:backend_getx/services/database_service.dart';
+import 'package:backend_getx/services/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+// ignore: must_be_immutable
 class NewProductScreen extends StatelessWidget {
   NewProductScreen({Key? key}) : super(key: key);
 
   final ProductController productController = Get.find();
 
+  StorageService storage = StorageService();
+  DatabaseService database = DatabaseService();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,29 +34,46 @@ class NewProductScreen extends StatelessWidget {
                   color: Colors.black,
                   child: Row(
                     children: [
-                      IconButton(
-                        onPressed: () async {
-                          // ignore: no_leading_underscores_for_local_identifiers
-                          ImagePicker _picker = ImagePicker();
-                          // ignore: no_leading_underscores_for_local_identifiers
-                          final XFile? _image = await _picker.pickImage(source: ImageSource.gallery);
+                      InkWell(
+                        child: SizedBox(
+                          height: 100,
+                          child: Card(
+                            margin: EdgeInsets.zero,
+                            color: Colors.black,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              child: Row(
+                                children: const [
+                                  Icon(Icons.add_circle, color: Colors.white),
+                                  SizedBox(width: 15),
+                                  Text(
+                                    'Add an Image',
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        onTap: () async {
+                          ImagePicker picker = ImagePicker();
+                          final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
-                          if (_image == null) {
+                          if (image == null) {
                             // ignore: use_build_context_synchronously
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                               content: Text('No image was selected'),
                             ));
                           }
+
+                          if (image != null) {
+                            await storage.uploadImage(image);
+                            var imageUrl = await storage.getDownloadURL(image.name);
+
+                            productController.newProduct.update('imageUrl', (_) => imageUrl, ifAbsent: () => imageUrl);
+                          }
                         },
-                        icon: const Icon(
-                          Icons.add_circle,
-                          color: Colors.white,
-                        ),
                       ),
-                      const Text(
-                        'Add an Image',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                      )
                     ],
                   ),
                 ),
@@ -74,7 +97,19 @@ class NewProductScreen extends StatelessWidget {
                   child: ElevatedButton(
                 style: ElevatedButton.styleFrom(primary: Colors.black),
                 onPressed: () {
-                  print(productController.newProduct);
+                  database.addProduct(
+                    Product(
+                      id: (productController.newProduct['id']),
+                      name: productController.newProduct['name'],
+                      category: productController.newProduct['category'],
+                      description: productController.newProduct['description'],
+                      imageUrl: productController.newProduct['imageUrl'] ?? '',
+                      isRecommended: productController.newProduct['isRecommended'],
+                      isPopular: productController.newProduct['isPopular'],
+                      price: productController.newProduct['price'],
+                      quantity: productController.newProduct['quantity'].toInt(),
+                    ),
+                  );
                 },
                 child: const Text('Save'),
               )),
@@ -123,7 +158,11 @@ class NewProductScreen extends StatelessWidget {
             activeColor: Colors.black,
             inactiveColor: Colors.black12,
             onChanged: (value) {
-              productController.newProduct.update(name, (_) => value, ifAbsent: () => value);
+              productController.newProduct.update(
+                name,
+                (_) => value,
+                ifAbsent: () => value,
+              );
             },
           ),
         ),
