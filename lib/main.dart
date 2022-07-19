@@ -5,6 +5,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'screen/orders_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -23,6 +25,7 @@ class MyApp extends StatelessWidget {
       getPages: [
         GetPage(name: '/products', page: () => ProductScreen()),
         GetPage(name: '/products/new', page: () => NewProductScreen()),
+        GetPage(name: '/orders', page: () => const OrdersScreen()),
       ],
     );
   }
