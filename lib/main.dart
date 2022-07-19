@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      home: const HomeScreen(),
+      home: HomeScreen(),
       getPages: [
         GetPage(name: '/products', page: () => ProductScreen()),
         GetPage(name: '/products/new', page: () => NewProductScreen()),
