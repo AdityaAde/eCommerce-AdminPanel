@@ -1,11 +1,15 @@
+import 'package:backend_getx/controller/order_controller.dart';
 import 'package:backend_getx/models/order_model.dart';
 import 'package:backend_getx/models/product_models.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 
 class OrdersScreen extends StatelessWidget {
-  const OrdersScreen({Key? key}) : super(key: key);
+  OrdersScreen({Key? key}) : super(key: key);
+
+  final OrderController orderController = Get.put(OrderController());
 
   @override
   Widget build(BuildContext context) {
@@ -18,11 +22,13 @@ class OrdersScreen extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-              child: ListView.builder(
-            itemCount: Order.orders.length,
-            itemBuilder: (context, index) {
-              return OrderCard(order: Order.orders[index]);
-            },
+              child: Obx(
+            () => ListView.builder(
+              itemCount: orderController.pendingOrders.length,
+              itemBuilder: (context, index) {
+                return OrderCard(order: orderController.pendingOrders[index]);
+              },
+            ),
           ))
         ],
       ),
@@ -31,8 +37,10 @@ class OrdersScreen extends StatelessWidget {
 }
 
 class OrderCard extends StatelessWidget {
+  OrderCard({Key? key, required this.order}) : super(key: key);
+
   final Order order;
-  const OrderCard({Key? key, required this.order}) : super(key: key);
+  final OrderController orderController = Get.find();
 
   @override
   Widget build(BuildContext context) {
@@ -133,26 +141,68 @@ class OrderCard extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
+                  order.isAccepted
+                      ? ElevatedButton(
+                          onPressed: () {
+                            orderController.updateOrder(
+                              order,
+                              "isDelivered",
+                              !order.isDelivered,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.black,
+                            minimumSize: const Size(150, 40),
+                          ),
+                          child: const Text(
+                            'Deliver',
+                            style: TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
+                        )
+                      : ElevatedButton(
+                          onPressed: () {
+                            orderController.updateOrder(
+                              order,
+                              "isAccepted",
+                              !order.isAccepted,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.black,
+                            minimumSize: const Size(150, 40),
+                          ),
+                          child: const Text(
+                            'Accept',
+                            style: TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
                   ElevatedButton(
+                    onPressed: () {
+                      orderController.updateOrder(
+                        order,
+                        "isCancelled",
+                        !order.isCancelled,
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       primary: Colors.black,
                       minimumSize: const Size(150, 40),
                     ),
-                    onPressed: () {},
-                    child: const Text('Accept', style: TextStyle(fontSize: 12)),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.black,
-                      minimumSize: const Size(150, 40),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(
+                        fontSize: 12,
+                      ),
                     ),
-                    onPressed: () {},
-                    child: const Text('Cancel', style: TextStyle(fontSize: 12)),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
