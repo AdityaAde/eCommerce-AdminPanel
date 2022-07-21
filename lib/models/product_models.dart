@@ -68,7 +68,6 @@ class Product extends Equatable {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'name': name,
       'category': category,
       'description': description,

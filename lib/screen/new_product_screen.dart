@@ -16,6 +16,12 @@ class NewProductScreen extends StatelessWidget {
   DatabaseService database = DatabaseService();
   @override
   Widget build(BuildContext context) {
+    List<String> categories = [
+      'Smoothies',
+      'Soft Drinks',
+      'Water',
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add a Product'),
@@ -86,7 +92,20 @@ class NewProductScreen extends StatelessWidget {
               _buildTextformField('Product ID', 'id', productController),
               _buildTextformField('Product Name', 'name', productController),
               _buildTextformField('Product Description', 'description', productController),
-              _buildTextformField('Product Category', 'category', productController),
+              //_buildTextformField('Product Category', 'category', productController),
+              DropdownButtonFormField(
+                iconSize: 20,
+                decoration: const InputDecoration(hintText: 'Product Category'),
+                items: categories.map((category) {
+                  return DropdownMenuItem(
+                    value: category,
+                    child: Text(category),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  productController.newProduct.update('category', (_) => value, ifAbsent: () => value);
+                },
+              ),
               const SizedBox(height: 10),
               _buildSlider('Price', 'price', productController, productController.price),
               _buildSlider('Quantity', 'quantity', productController, productController.quantity),
@@ -99,17 +118,18 @@ class NewProductScreen extends StatelessWidget {
                 onPressed: () {
                   database.addProduct(
                     Product(
-                      id: (productController.newProduct['id']),
+                      id: productController.newProduct['id'],
                       name: productController.newProduct['name'],
                       category: productController.newProduct['category'],
                       description: productController.newProduct['description'],
                       imageUrl: productController.newProduct['imageUrl'] ?? '',
-                      isRecommended: productController.newProduct['isRecommended'],
-                      isPopular: productController.newProduct['isPopular'],
+                      isRecommended: productController.newProduct['isRecommended'] ?? false,
+                      isPopular: productController.newProduct['isPopular'] ?? false,
                       price: productController.newProduct['price'],
                       quantity: productController.newProduct['quantity'].toInt(),
                     ),
                   );
+                  Navigator.pop(context);
                 },
                 child: const Text('Save'),
               )),
